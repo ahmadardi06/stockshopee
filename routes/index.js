@@ -7,7 +7,26 @@ var TOKEN_BOT = "915963347:AAE7TRrFASw5yuV0wEzfeeX6ng-RwJdeP0o";
 //var CHAT_ID = 812449714;
 var CHAT_ID = 316438698;
 var TelegramBotClient = require('telegram-bot-client');
+var TelegramBot = require('node-telegram-bot-api');
+
 var client = new TelegramBotClient(TOKEN_BOT);
+var botTelegram = new TelegramBot(TOKEN_BOT, {polling: true});
+botTelegram.on('message', (msg) => {
+  var pengirim = msg.chat.id;
+  if(msg.text === 'reset') {
+  	conn.serialize( () => {
+		let sql = "UPDATE stock SET stock = 0 WHERE id = ?";
+		conn.run(sql, [1], (err) => { 
+			if(!err) {
+				console.log('Stock has been reseted.');
+  			client.sendMessage(pengirim, 'Stock telah direset.');
+			}
+		});
+	});
+  } else {
+  	client.sendMessage(pengirim, 'Perintah tidak ditemukan.');
+  }
+});
 
 var auth = require('../configs/auth');
 var conn = require('../configs/dbase');
