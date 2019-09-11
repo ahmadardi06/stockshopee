@@ -2,10 +2,12 @@ var express = require('express');
 var jwt = require('jsonwebtoken');
 var router = express.Router();
 
-var TOKEN_BOT = "915963347:AAE7TRrFASw5yuV0wEzfeeX6ng-RwJdeP0o";
+var TOKEN_BOT = "845430643:AAGDRv1fRcQaEhNKLHLfPY_Ow2qPaSflbjE";
+// var TOKEN_BOT = "915963347:AAE7TRrFASw5yuV0wEzfeeX6ng-RwJdeP0o";
 // chat_id client faruq
-var CHAT_ID = 812449714;
-var CHAT_ID_AHMAD = 316438698;
+// var CHAT_ID = 812449714;
+// var CHAT_ID_AHMAD = 316438698;
+var CHAT_ID = 316438698;
 var TelegramBotClient = require('telegram-bot-client');
 var TelegramBot = require('node-telegram-bot-api');
 
@@ -13,20 +15,21 @@ var client = new TelegramBotClient(TOKEN_BOT);
 var botTelegram = new TelegramBot(TOKEN_BOT, {polling: true});
 botTelegram.on('message', (msg) => {
   var pengirim = msg.chat.id;
-  if(msg.text === 'reset') {
+  var messagePecah = msg.text.split(' ');
+  if(messagePecah[0] === 'reset') {
   	conn.serialize( () => {
-		let sql = "UPDATE stock SET stock = 0 WHERE id = ?";
-		conn.run(sql, [1], (err) => { 
+		let sql = "UPDATE stock SET stock = 0 WHERE link = ?";
+		conn.run(sql, [messagePecah[1]], (err) => { 
 			if(!err) {
 				console.log('Stock has been reseted.');
   			client.sendMessage(pengirim, 'Stock telah direset.');
 			}
 		});
 	});
-  } else if(msg.text === 'stock') {
+  } else if(messagePecah[0] === 'stock') {
   	conn.serialize( () => {
-			let sql = "SELECT * FROM stock WHERE id = ?";
-			conn.get(sql, [1], (err, rows) => {
+			let sql = "SELECT * FROM stock WHERE link = ?";
+			conn.get(sql, [messagePecah[1]], (err, rows) => {
 				if(err) return console.error(err);
 				if(rows) {
 					client.sendMessage(pengirim, 'Stock sekarang '+rows.stock);			
@@ -66,8 +69,8 @@ router.get('/rows', (req, res, next) => {
 router.get('/api/v1/stock', auth.access, (req, res, next) => {
 	if(req.query.stock) {
 		conn.serialize( () => {
-			let sql = "SELECT * FROM stock WHERE id = ?";
-			conn.get(sql, [1], (err, rows) => {
+			let sql = "SELECT * FROM stock WHERE link = ?";
+			conn.get(sql, [req.query.link], (err, rows) => {
 				if(err) return console.error(err);
 
 				if(rows) {
@@ -75,35 +78,35 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 						if(req.query.stock == 0) {
 							res.json({ status: 'OK', message: 'Stock on shopee empty.'});
 						} else {
-							var message = "Stock sekarang sebanyak "+req.query.stock;
+							var message = "Stok "+req.query.judul+" sebanyak "+req.query.stock;
 							client.sendMessage(CHAT_ID, message);
-							client.sendMessage(CHAT_ID_AHMAD, message);
+							// client.sendMessage(CHAT_ID_AHMAD, message);
 							res.json({ status: 'OK', message: 'Stock on database same with on shoopee.'});
 						}
 					} else if(rows.stock >= req.query.stock) {
-						let hitung = rows.stock - req.query.stock;
-						let message = "Stock berkurang sebanyak "+hitung;
+						// jika stock db lebih besar
+						var message = "Stok "+req.query.judul+" sebanyak "+req.query.stock;
 						conn.serialize( () => {
-							let sql = "UPDATE stock SET stock = "+req.query.stock+" WHERE id = ?";
-							conn.run(sql, [1], (err) => { 
+							let sql = "UPDATE stock SET stock = "+req.query.stock+" WHERE link = ?";
+							conn.run(sql, [req.query.link], (err) => { 
 								if(!err) {
 									console.log('Data stock updated.'); 
 									client.sendMessage(CHAT_ID, message);
-									client.sendMessage(CHAT_ID_AHMAD, message);
+									// client.sendMessage(CHAT_ID_AHMAD, message);
 									res.json({ status: 'OK', message: message});
 								}
 							});
 						});
 					} else if(rows.stock <= req.query.stock) {
-						let hitung = req.query.stock - rows.stock;
-						let message = "Stock bertambah sebanyak "+hitung;
+						// jika stock db lebih kecil
+						var message = "Stok "+req.query.judul+" sebanyak "+req.query.stock;
 						conn.serialize( () => {
-							let sql = "UPDATE stock SET stock = "+req.query.stock+" WHERE id = ?";
-							conn.run(sql, [1], (err) => { 
+							let sql = "UPDATE stock SET stock = "+req.query.stock+" WHERE link = ?";
+							conn.run(sql, [req.query.link], (err) => { 
 								if(!err) {
 									console.log('Data stock updated.'); 
 									client.sendMessage(CHAT_ID, message);
-									client.sendMessage(CHAT_ID_AHMAD, message);
+									// client.sendMessage(CHAT_ID_AHMAD, message);
 									res.json({ status: 'OK', message: message});
 								}
 							});
@@ -112,9 +115,15 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 						res.json({ status: 'OK', message: 'Stock on database not greater and not lower.', data: rows});
 					}
 				} else {
-					console.log('Nothing data not found.');		
+					conn.serialize(function(){
+				    let sql = "INSERT INTO stock (stock, link, judul) VALUES (?, ?, ?)";
+				    conn.run(sql, [req.query.stock, req.query.link, req.query.judul], (err) => {
+				        if(err) throw err;
+				        console.log("1 new record inserted.");
+				        res.json({ status: 'OK', message: 'New record inserted.'})
+				    });
+					});		
 				}
-
 			});
 		});
 	} else {
@@ -140,11 +149,23 @@ router.post('/api/v1/generate', (req, res, next) => {
 
 router.get('/reset', (req, res, next) => {
 	conn.serialize( () => {
-		let sql = "UPDATE stock SET stock = 0 WHERE id = ?";
-		conn.run(sql, [1], (err) => { 
+		let sql = "UPDATE stock SET stock = 0 WHERE link = ?";
+		conn.run(sql, [req.query.link], (err) => { 
 			if(!err) {
 				console.log('Stock has been reseted.');
 				res.json({ status: 'OK', message: 'Stock has been reseted.'})
+			}
+		});
+	});
+});
+
+router.get('/reset-all', (req, res, next) => {
+	conn.serialize( () => {
+		let sql = "DELETE FROM stock";
+		conn.run(sql, (err) => { 
+			if(!err) {
+				console.log('All rows has been deleted.');
+				res.json({ status: 'OK', message: 'All rows has been deleted.'})
 			}
 		});
 	});
