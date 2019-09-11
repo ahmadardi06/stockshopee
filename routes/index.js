@@ -23,6 +23,16 @@ botTelegram.on('message', (msg) => {
 			}
 		});
 	});
+  } else if(msg.text === 'stock') {
+  	conn.serialize( () => {
+			let sql = "SELECT * FROM stock WHERE id = ?";
+			conn.get(sql, [1], (err, rows) => {
+				if(err) return console.error(err);
+				if(rows) {
+					client.sendMessage(pengirim, 'Stock sekarang '+rows.stock);			
+				}
+			})
+		})
   } else {
   	client.sendMessage(pengirim, 'Perintah tidak ditemukan.');
   }
@@ -63,11 +73,9 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 				if(rows) {
 					if(rows.stock == req.query.stock) {
 						if(req.query.stock == 0) {
-							let message = "Stock habis sisa 0";
-							client.sendMessage(CHAT_ID, message);
-							res.json({ status: 'OK', message: 'Stock on shopee empty.', data: rows});
+							res.json({ status: 'OK', message: 'Stock on shopee empty.'});
 						} else {
-							res.json({ status: 'OK', message: 'Stock on database same with on shoopee.', data: rows});
+							res.json({ status: 'OK', message: 'Stock on database same with on shoopee.'});
 						}
 					} else if(rows.stock >= req.query.stock) {
 						let hitung = rows.stock - req.query.stock;
@@ -78,7 +86,7 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 								if(!err) {
 									console.log('Data stock updated.'); 
 									client.sendMessage(CHAT_ID, message);
-									res.json({ status: 'OK', message: message, data: rows});
+									res.json({ status: 'OK', message: message});
 								}
 							});
 						});
@@ -91,7 +99,7 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 								if(!err) {
 									console.log('Data stock updated.'); 
 									client.sendMessage(CHAT_ID, message);
-									res.json({ status: 'OK', message: message, data: rows});
+									res.json({ status: 'OK', message: message});
 								}
 							});
 						});
