@@ -79,7 +79,7 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 						}
 					} else if(rows.stock >= req.query.stock) {
 						let hitung = rows.stock - req.query.stock;
-						let message = "Stok berkurang sebanyak "+hitung;
+						let message = "Stock berkurang sebanyak "+hitung;
 						conn.serialize( () => {
 							let sql = "UPDATE stock SET stock = "+req.query.stock+" WHERE id = ?";
 							conn.run(sql, [1], (err) => { 
@@ -92,7 +92,7 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 						});
 					} else if(rows.stock <= req.query.stock) {
 						let hitung = req.query.stock - rows.stock;
-						let message = "Stok bertambah sebanyak "+hitung;
+						let message = "Stock bertambah sebanyak "+hitung;
 						conn.serialize( () => {
 							let sql = "UPDATE stock SET stock = "+req.query.stock+" WHERE id = ?";
 							conn.run(sql, [1], (err) => { 
