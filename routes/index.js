@@ -2,12 +2,12 @@ var express = require('express');
 var jwt = require('jsonwebtoken');
 var router = express.Router();
 
-var TOKEN_BOT = "845430643:AAGDRv1fRcQaEhNKLHLfPY_Ow2qPaSflbjE";
-// var TOKEN_BOT = "915963347:AAE7TRrFASw5yuV0wEzfeeX6ng-RwJdeP0o";
+// var TOKEN_BOT = "845430643:AAGDRv1fRcQaEhNKLHLfPY_Ow2qPaSflbjE";
+var TOKEN_BOT = "915963347:AAE7TRrFASw5yuV0wEzfeeX6ng-RwJdeP0o";
 // chat_id client faruq
-// var CHAT_ID = 812449714;
-// var CHAT_ID_AHMAD = 316438698;
-var CHAT_ID = 316438698;
+var CHAT_ID = 812449714;
+var CHAT_ID_AHMAD = 316438698;
+// var CHAT_ID = 316438698;
 var TelegramBotClient = require('telegram-bot-client');
 var TelegramBot = require('node-telegram-bot-api');
 
@@ -80,7 +80,7 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 						} else {
 							var message = "Stok "+req.query.judul+" sebanyak "+req.query.stock;
 							client.sendMessage(CHAT_ID, message);
-							// client.sendMessage(CHAT_ID_AHMAD, message);
+							client.sendMessage(CHAT_ID_AHMAD, message);
 							res.json({ status: 'OK', message: 'Stock on database same with on shoopee.'});
 						}
 					} else if(rows.stock >= req.query.stock) {
@@ -92,7 +92,7 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 								if(!err) {
 									console.log('Data stock updated.'); 
 									client.sendMessage(CHAT_ID, message);
-									// client.sendMessage(CHAT_ID_AHMAD, message);
+									client.sendMessage(CHAT_ID_AHMAD, message);
 									res.json({ status: 'OK', message: message});
 								}
 							});
@@ -106,7 +106,7 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 								if(!err) {
 									console.log('Data stock updated.'); 
 									client.sendMessage(CHAT_ID, message);
-									// client.sendMessage(CHAT_ID_AHMAD, message);
+									client.sendMessage(CHAT_ID_AHMAD, message);
 									res.json({ status: 'OK', message: message});
 								}
 							});
