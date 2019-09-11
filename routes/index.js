@@ -75,6 +75,9 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 						if(req.query.stock == 0) {
 							res.json({ status: 'OK', message: 'Stock on shopee empty.'});
 						} else {
+							var message = "Stock sekarang sebanyak "+req.query.stock;
+							client.sendMessage(CHAT_ID, message);
+							client.sendMessage(CHAT_ID_AHMAD, message);
 							res.json({ status: 'OK', message: 'Stock on database same with on shoopee.'});
 						}
 					} else if(rows.stock >= req.query.stock) {
