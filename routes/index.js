@@ -106,4 +106,13 @@ router.post('/api/v1/generate', (req, res, next) => {
 	res.json({ status: 'OK', message: 'You can get your token.', data: token });
 });
 
+router.post('/reset', (req, res, next) => {
+	conn.serialize( () => {
+		let sql = "UPDATE stock SET stock = 0 WHERE id = ?";
+		conn.run(sql, [1], (err) => { 
+			if(!err) console.log('Stock has been reseted.');
+		});
+	});
+});
+
 module.exports = router;
