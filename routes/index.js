@@ -41,7 +41,13 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 
 				if(rows) {
 					if(rows.stock == req.query.stock) {
-						res.json({ status: 'OK', message: 'Stock on database same with on shoopee.', data: rows});
+						if(req.query.stock == 0) {
+							let message = "Stock habis sisa 0";
+							client.sendMessage(CHAT_ID, message);
+							res.json({ status: 'OK', message: 'Stock on shopee empty.', data: rows});
+						} else {
+							res.json({ status: 'OK', message: 'Stock on database same with on shoopee.', data: rows});
+						}
 					} else if(rows.stock >= req.query.stock) {
 						let hitung = rows.stock - req.query.stock;
 						let message = "Stok berkurang sebanyak "+hitung;
