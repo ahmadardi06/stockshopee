@@ -110,7 +110,10 @@ router.post('/reset', (req, res, next) => {
 	conn.serialize( () => {
 		let sql = "UPDATE stock SET stock = 0 WHERE id = ?";
 		conn.run(sql, [1], (err) => { 
-			if(!err) console.log('Stock has been reseted.');
+			if(!err) {
+				console.log('Stock has been reseted.');
+				res.json({ status: 'OK', message: 'Stock has been reseted.'})
+			}
 		});
 	});
 });
