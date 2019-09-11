@@ -2,7 +2,9 @@ var express = require('express');
 var jwt = require('jsonwebtoken');
 var router = express.Router();
 
-var TOKEN_BOT = "845430643:AAGDRv1fRcQaEhNKLHLfPY_Ow2qPaSflbjE";
+var TOKEN_BOT = "915963347:AAE7TRrFASw5yuV0wEzfeeX6ng-RwJdeP0o";
+// chat_id client faruq
+//var CHAT_ID = 812449714;
 var CHAT_ID = 316438698;
 var TelegramBotClient = require('telegram-bot-client');
 var client = new TelegramBotClient(TOKEN_BOT);
