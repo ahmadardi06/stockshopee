@@ -67,7 +67,7 @@ router.get('/rows', (req, res, next) => {
 });
 
 router.get('/api/v1/stock', auth.access, (req, res, next) => {
-	if(req.query.stock) {
+	if(req.query.stock && req.query.link && req.query.judul) {
 		conn.serialize( () => {
 			let sql = "SELECT * FROM stock WHERE link = ?";
 			conn.get(sql, [req.query.link], (err, rows) => {
@@ -127,7 +127,7 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 			});
 		});
 	} else {
-		res.json({ status: 'ERROR', message: 'Parameters stock must be filled.'});
+		res.json({ status: 'ERROR', message: 'Parameters must be filled.'});
 	}
 });
 
