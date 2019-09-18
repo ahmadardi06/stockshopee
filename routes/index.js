@@ -131,6 +131,7 @@ router.get('/api/v1/stock', auth.access, (req, res, next) => {
 	}
 });
 
+
 router.post('/api/v1/generate', (req, res, next) => {
 	var userParams = req.query.user;
 	var passParams = req.query.pass;

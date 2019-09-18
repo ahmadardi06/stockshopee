@@ -2,6 +2,21 @@ doctype html
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css')
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js')
+    script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js')
+
   body
+    nav.navbar.navbar-inverse
+      .container
+        .navbar-header
+          a.navbar-brand(href=env.app_url+'/users/webui') Stock Shopee
+        ul.nav.navbar-nav.navbar-right
+          li
+            a(href=env.app_url+'/users/webui') Reload
+          li
+            a(href='https://my.ardimasyu.com', target='_blank') Ahmad Ardiansyah
+          li
+            a(href='#') Version 2.1
+
     block content

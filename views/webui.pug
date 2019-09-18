@@ -1,0 +1,78 @@
+extends layout
+
+block content
+  .container
+    .row
+      .col-sm-12
+        button.btn.btn-success(onclick='tambahTabel()') Tambah Barang
+        | &nbsp;
+        button.btn.btn-danger(onclick='stopLooping()') Stop Monitoring
+        hr
+        table.table.table-striped#tabelKu
+          tr
+            th NO
+            th URL
+            th ACTION
+          tr
+            td 1
+            td
+              input#data1.form-control(type='text', name='url', placeholder='link item shopee', value='')
+            td
+              a.btn.btn-primary(href='javascript:;', onclick='startLooping(this)', data-nomor='1') Start
+          tr
+            td 2
+            td
+              input#data2.form-control(type='text', name='url', placeholder='link item shopee', value='')
+            td
+              a.btn.btn-primary(href='javascript:;', onclick='startLooping(this)', data-nomor='2') Start
+
+  script.
+    var nomor = 3;
+    function tambahTabel() {
+      var html = "<tr><td>"+nomor+"</td><td><input class='form-control' id='data"+nomor+"' placeholder='link item shopee' /></td><td><a class='btn btn-primary' href='javascript:;' data-nomor='"+nomor+"' onclick='startLooping(this)'>Start</a></td></tr>";
+      $('#tabelKu').append(html);
+      nomor++;
+    }
+
+    function fetchData(element){
+      var dataNomor = $(element).attr('data-nomor');
+      var linkUrl = $('#data'+dataNomor).val();
+      var pecah = linkUrl.split('/');
+      var itemid, shopid;
+      if(pecah.length == 6) {
+        shopid = pecah[4];
+        var pecahLagi = pecah[5].split('?');
+        if(pecahLagi.length > 0) {
+          itemid = pecahLagi[0];
+        } else {
+          itemid = pecah[5];
+        }
+      } else if (pecah.length == 4) {
+        var pecahLagi = pecah[3].split('.');
+        shopid = pecahLagi[pecahLagi.length-2];
+        itemid = pecahLagi[pecahLagi.length-1];
+      } else {
+        console.log('Format tidak sesuai.');
+      }
+
+      var LINKAPI = '!{env.app_url}/users/item/'+itemid+'/'+shopid;
+      var TOKENAPI = 'eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiYWhtYWQiLCJwYXNzIjoiYXJkaWFuc3lhaCIsImlhdCI6MTU2ODEyMjE0Mn0.-Wyt8h9bmP5Z6m_HvqaxF8QN6Txux3Vrv8b337J3saQYnbJsO9k6hCDCaoz1G4nh';
+
+      $.get(LINKAPI).then(function(data, status) {
+        var LINKAPIBOT = '!{env.app_url}/api/v1/stock?link='+linkUrl+'&stock='+data.stock+'&judul='+data.name+'&token='+TOKENAPI;
+        $.get(LINKAPIBOT).then(function(resp, stats) {
+          console.log(resp);
+          console.log(stats);
+        })
+      })
+    }
+
+    function startLooping(elem) {
+      setInterval(function() {
+        fetchData(elem);
+      }, 5000);
+    }
+
+    function stopLooping() {
+      location.reload();
+    }
