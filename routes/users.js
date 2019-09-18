@@ -15,8 +15,10 @@ router.get('/send', function(req, res, next) {
 
 	if(req.query.chat_id && req.query.message){
   	client.sendMessage(req.query.chat_id, req.query.message);
+  	res.json({msg: 'Chat sended.'});
 	} else {
   	client.sendMessage(CHAT_ID, req.query.message);
+  	res.json({msg: 'Chat sended.'});
 	}
 });
 
