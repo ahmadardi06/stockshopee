@@ -1,3 +1,3 @@
 module.exports = {
-	'app_url': 'http://localhost:3000'
+	'app_url': 'https://stockshopee.herokuapp.com'
 }
