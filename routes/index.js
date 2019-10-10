@@ -1,6 +1,7 @@
 var express = require('express');
 var jwt = require('jsonwebtoken');
 var router = express.Router();
+var request = require('request');
 
 // var TOKEN_BOT = "845430643:AAGDRv1fRcQaEhNKLHLfPY_Ow2qPaSflbjE";
 var TOKEN_BOT = "915963347:AAE7TRrFASw5yuV0wEzfeeX6ng-RwJdeP0o";
@@ -65,6 +66,92 @@ router.get('/rows', (req, res, next) => {
 		})
 	});
 });
+
+router.get('/item-process', function (req, res, next) {
+	if(req.query.add) {
+		conn.serialize(function(){
+	    let sql = "INSERT INTO stock (stock, link, judul) VALUES (?, ?, ?)";
+	    conn.run(sql, ['0', req.query.add, 'static_shopee'], (err) => {
+	        if(err) throw err;
+	        console.log("1 new record inserted.");
+	        res.json({ status: 'OK', message: 'New record inserted.'})
+	    });
+		});		
+	} else if (req.query.edit) {
+		conn.serialize( () => {
+			let sql = "UPDATE stock SET link = '"+req.query.edit+"' WHERE judul = ?";
+			conn.run(sql, ['static_shopee'], (err) => { 
+				if(!err) {
+					console.log('Data stock updated.'); 
+					res.json({ status: 'OK', message: 'Data has been updated.'});
+				}
+			});
+		});
+	} else {
+		res.json({ status: 200, message: 'Not Found'});
+		console.log('Nothing data to show.');
+	}
+})
+
+router.get('/item', function(req, res, next) {
+	conn.serialize( () => {
+		let sql = "SELECT * FROM stock WHERE judul = ?";
+		conn.get(sql, ['static_shopee'], (err, rows) => {
+			if(err) return console.error(err);
+			if(rows) {
+				res.render('item', {
+					rows: rows
+				});
+			} else {
+				res.json({ status: 200, message: 'Not Found'});
+				console.log('Nothing data to show.');
+			}
+		})
+	});
+});
+
+router.get('/price', function(req, res, next) {
+	if(req.query.link) {
+		var link = req.query.link;
+		var pecah = link.split('/');
+		if(pecah.length == 6) {
+			var shopid = pecah[4];
+      var pecahLagi = pecah[5].split('?');
+      if(pecahLagi.length > 0) {
+        var itemid = pecahLagi[0];
+      } else {
+        var itemid = pecah[5];
+      }
+		} else if(pecah.length == 4) {
+			var pecahLagi = pecah[3].split('.');
+      var shopid = pecahLagi[pecahLagi.length-2];
+      var itemid = pecahLagi[pecahLagi.length-1];
+		}
+
+		// var pecah = link.split('.');
+		var api = 'https://shopee.co.id/api/v2/item/get?itemid='+itemid+'&shopid='+shopid;
+
+		request(api, (error, response, html) => {
+			if(error) console.log(error)
+			
+			var jsonParse = JSON.parse(html);
+			if(jsonParse.item.flash_sale != null) {
+				var priceNow = jsonParse.item.flash_sale.price;
+				res.send("<div id='price'>"+priceNow/100000+"</div>");
+			} else {
+				res.json({
+					status: 200,
+					price: 0 
+				});
+			}
+		})
+	} else {
+		res.json({
+			status: 200,
+			price: 0 
+		});
+	}
+})
 
 router.get('/api/v1/stock', auth.access, (req, res, next) => {
 	if(req.query.stock && req.query.link && req.query.judul) {
